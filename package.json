@@ -16,6 +16,7 @@
     "core-js": "^3.25.3",
     "nuxt": "^2.15.8",
     "vue": "^2.7.10",
+    "vue-class-component": "^7.2.6",
     "vue-server-renderer": "^2.7.10",
     "vue-template-compiler": "^2.7.10"
   },
@@ -41,5 +42,5 @@
   },
   "resolutions": {
     "@nuxt/kit": "3.0.0-rc.13"
-}
+  }
 }
