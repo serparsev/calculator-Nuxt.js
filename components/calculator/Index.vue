@@ -1,6 +1,6 @@
 <template>
   <div class="calculator">
-    <LogScreen :logs="logs" />
+    <LogScreen :logs="getLogs" />
 
     <input id="display" v-model="display" class="display" type="text" disabled>
 
@@ -20,14 +20,11 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 
+import { Getter, Action } from 'vuex-class'
+import { ActionContext } from 'vuex'
 import ButtonComponent from './Button.vue'
 import LogScreen from './LogScreen.vue'
-
-interface Button {
-  id: string,
-  value: string;
-  type: string
-}
+import { Button, StateType } from '@/types'
 
 @Component({
   components: {
@@ -37,6 +34,9 @@ interface Button {
 })
 
 export default class Calculator extends Vue {
+  @Getter getLogs: number
+  @Action addLog!: ActionContext<StateType, StateType>
+
   display: string = '0'
   keyboard: Button[][] = [
     [
@@ -72,7 +72,6 @@ export default class Calculator extends Vue {
   operands: string[] = []
   operand: string = ''
   index: number = 0
-  logs: string[] = []
   hasPreviosResult: boolean = false
 
   // Handle different action depending on which key is pressed
@@ -140,7 +139,7 @@ export default class Calculator extends Vue {
 
         const logEntry = `${calc} = ${rounded}`
 
-        this.addToLogs(logEntry)
+        this.$store.dispatch('addLog', logEntry)
 
         this.updateDisplay()
       } catch {
@@ -149,14 +148,6 @@ export default class Calculator extends Vue {
     } else {
       this.display = 'Math Err'
     }
-  }
-
-  // Method to keep only 4 logs
-  private addToLogs (log: string): void {
-    if (this.logs.length === 4) {
-      this.logs.shift() // Deletes the first log
-    }
-    this.logs.push(log)
   }
 
   private isValidString (string: string): boolean {
