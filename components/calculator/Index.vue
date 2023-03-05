@@ -1,5 +1,11 @@
 <template>
   <div class="calculator">
+    <div>
+      <div v-for="(log , index) in logs" :key="`log-${index}`">
+        {{ log }}
+      </div>
+    </div>
+
     <input id="display" v-model="display" class="display" type="text" disabled>
 
     <div v-for="(row, rowIndex) in keyboard" :key="`row-${rowIndex}`" class="buttons-row">
@@ -16,8 +22,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import Component from 'vue-class-component'
+import { Component, Vue } from 'vue-property-decorator'
 
 import ButtonComponent from './Button.vue'
 
@@ -178,33 +183,21 @@ export default class Calculator extends Vue {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .calculator {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 300px;
-  background-color: #E0E0E0;
-  border: 1px solid #CCCCCC;
-  padding: 20px;
-  box-shadow: 3px 3px 5px rgba(0,0,0,0.1);
+  @apply absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 p-10;
+  @apply bg-stone-300 drop-shadow-md;
+  @apply rounded border border-black;
 }
 
 .display {
-  width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 10px;
-  padding: 10px;
-  font-size: 20px;
-  text-align: right;
-  background-color: #FFFFFF;
-  border: 1px solid #CCCCCC;
-  box-shadow: inset 0 1px 1px rgba(0,0,0,0.1);
+  @apply w-full box-border mb-5 p-5;
+  @apply text-xl text-right bg-white;
+  @apply rounded border border-black;
+  @apply drop-shadow-md;
 }
 
 .buttons-row {
-  display: flex;
-  justify-content: space-between;
+  @apply flex justify-between
 }
 </style>
