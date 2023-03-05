@@ -1,11 +1,11 @@
 <template>
   <div class="calculator">
-    <pre>{{ logs }}</pre>
-    <input v-model="display" class="display" type="text" disabled>
+    <input id="display" v-model="display" class="display" type="text" disabled>
 
     <div v-for="(row, rowIndex) in keyboard" :key="`row-${rowIndex}`" class="buttons-row">
       <ButtonComponent
         v-for="(button, buttonIndex) in row"
+        :id="`button-${button.id}`"
         :key="`button-${buttonIndex}`"
         :value="button.value"
         :type="button.type"
@@ -22,6 +22,7 @@ import Component from 'vue-class-component'
 import ButtonComponent from './Button.vue'
 
 interface Button {
+  id: string,
   value: string;
   type: string
 }
@@ -31,36 +32,37 @@ interface Button {
     ButtonComponent
   }
 })
+
 export default class Calculator extends Vue {
   display: string = '0'
   keyboard: Button[][] = [
     [
-      { value: 'AC', type: 'clear' },
-      { value: '<--', type: 'back' }
+      { id: 'clear', value: 'AC', type: 'clear' },
+      { id: 'back', value: '<--', type: 'back' }
     ],
     [
-      { value: '7', type: 'number' },
-      { value: '8', type: 'number' },
-      { value: '9', type: 'number' },
-      { value: '+', type: 'operation' }
+      { id: '7', value: '7', type: 'number' },
+      { id: '8', value: '8', type: 'number' },
+      { id: '9', value: '9', type: 'number' },
+      { id: 'add', value: '+', type: 'operation' }
     ],
     [
-      { value: '4', type: 'number' },
-      { value: '5', type: 'number' },
-      { value: '6', type: 'number' },
-      { value: '-', type: 'operation' }
+      { id: '4', value: '4', type: 'number' },
+      { id: '5', value: '5', type: 'number' },
+      { id: '6', value: '6', type: 'number' },
+      { id: 'sub', value: '-', type: 'operation' }
     ],
     [
-      { value: '1', type: 'number' },
-      { value: '2', type: 'number' },
-      { value: '3', type: 'number' },
-      { value: '*', type: 'operation' }
+      { id: '1', value: '1', type: 'number' },
+      { id: '2', value: '2', type: 'number' },
+      { id: '3', value: '3', type: 'number' },
+      { id: 'mult', value: '*', type: 'operation' }
     ],
     [
-      { value: '0', type: 'number' },
-      { value: '.', type: 'number' },
-      { value: '=', type: 'equals' },
-      { value: '/', type: 'operation' }
+      { id: '0', value: '0', type: 'number' },
+      { id: 'dot', value: '.', type: 'number' },
+      { id: 'equal', value: '=', type: 'equals' },
+      { id: 'div', value: '/', type: 'operation' }
     ]
   ]
 
@@ -68,7 +70,9 @@ export default class Calculator extends Vue {
   operand: string = ''
   index: number = 0
   logs: string[] = []
+  hasPreviosResult: boolean = false
 
+  // Handle different action depending on which key is pressed
   handleClick (button: Button): void {
     switch (button.type) {
       case button.type = 'clear':
@@ -94,19 +98,25 @@ export default class Calculator extends Vue {
   }
 
   private handleNumber (number: string): void {
-    if (this.display === '0') {
+    // In case a number is selected after making a calculation it resets the operations list
+    if (this.display === '0' || this.hasPreviosResult) {
       this.operand = number
+      this.hasPreviosResult = false
+      this.index = 0
     } else {
       this.operand += number
     }
 
+    // Add the operand at the same position until a operator is pressed
     this.operands[this.index] = this.operand
 
     this.updateDisplay()
   }
 
   private handleOperation (operator: string): void {
+    // Once the operator is pressed, the input number is defined
     this.operand = ''
+    this.hasPreviosResult = false
     this.operands.push(operator)
     this.index = this.operands.length
 
@@ -117,28 +127,35 @@ export default class Calculator extends Vue {
     const calc = this.operands.join(' ')
 
     if (this.isValidString(calc)) {
-      const result = eval(calc).toFixed(2)
-      const rounded = Math.round(result * 100) / 100
-      this.operands = [rounded.toString()]
-      this.operand = ''
+      try {
+        const result = eval(calc).toFixed(2)
+        const rounded = Math.round(result * 100) / 100
+        this.operands = [rounded.toString()]
+        this.hasPreviosResult = true
+        this.index = 1
+        this.operand = ''
 
-      const logEntry = `${calc} = ${rounded}`
-      this.logs.push(logEntry)
+        const logEntry = `${calc} = ${rounded}`
+        this.logs.push(logEntry)
 
-      this.updateDisplay()
+        this.updateDisplay()
+      } catch {
+        this.display = 'Syntax Err'
+      }
     } else {
       this.display = 'Math Err'
     }
   }
 
   private isValidString (string: string): boolean {
-    const regex = /^-?[0-9]+(\.[0-9]+)?([+\-*\/][0-9]+(\.[0-9]+)?)*$/
+    const regex = /^-?\d*\.?\d+(?:[-+*\/]-?\d*\.?\d+)*$/
 
     return regex.test(string.replaceAll(' ', ''))
   }
 
   private handleRemove (): void {
     this.operands.pop()
+    this.index = this.operands.length
 
     if (!this.operands.length) {
       this.display = '0'
