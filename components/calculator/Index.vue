@@ -1,10 +1,6 @@
 <template>
   <div class="calculator">
-    <div>
-      <div v-for="(log , index) in logs" :key="`log-${index}`">
-        {{ log }}
-      </div>
-    </div>
+    <LogScreen :logs="logs" />
 
     <input id="display" v-model="display" class="display" type="text" disabled>
 
@@ -25,6 +21,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 
 import ButtonComponent from './Button.vue'
+import LogScreen from './LogScreen.vue'
 
 interface Button {
   id: string,
@@ -34,7 +31,8 @@ interface Button {
 
 @Component({
   components: {
-    ButtonComponent
+    ButtonComponent,
+    LogScreen
   }
 })
 
@@ -141,7 +139,8 @@ export default class Calculator extends Vue {
         this.operand = ''
 
         const logEntry = `${calc} = ${rounded}`
-        this.logs.push(logEntry)
+
+        this.addToLogs(logEntry)
 
         this.updateDisplay()
       } catch {
@@ -150,6 +149,14 @@ export default class Calculator extends Vue {
     } else {
       this.display = 'Math Err'
     }
+  }
+
+  // Method to keep only 4 logs
+  private addToLogs (log: string): void {
+    if (this.logs.length === 4) {
+      this.logs.shift() // Deletes the first log
+    }
+    this.logs.push(log)
   }
 
   private isValidString (string: string): boolean {
